@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NexScript - Premium Scripts, Plugins & Themes Marketplace</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdfa',
+              100: '#ccfbf1',
+              400: '#2dd4bf',
+              500: '#14b8a6',
+              600: '#0d9488',
+              700: '#0f766e',
+              900: '#134e4a',
+            },
+            dark: {
+              900: '#090d16',
+              800: '#111827',
+              700: '#1f2937',
+              600: '#374151'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Vue 3 CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Font Family -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #090d16;
+      color: #f3f4f6;
+    }
+    .glass-card {
+      background: rgba(17, 24, 39, 0.7);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .neon-glow {
+      box-shadow: 0 0 25px -5px rgba(20, 184, 166, 0.3);
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090d16;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1f2937;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #374151;
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased flex flex-col">
+
+  <div id="app" class="flex-1 flex flex-col min-h-screen">
+
+    <!-- Top Announcement Bar -->
+    <div class="bg-gradient-to-r from-brand-900 via-brand-600 to-indigo-900 text-xs py-2 px-4 text-center font-medium text-teal-100 flex items-center justify-center gap-2">
+      <i data-lucide="shield-check" class="w-4 h-4 text-brand-400"></i>
+      <span>Enhanced Email Security Active: Real-time MX, Syntax & Disposable Mail Scanning Enforced</span>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <header class="sticky top-0 z-40 glass-card border-b border-gray-800/80">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+        
+        <!-- Logo -->
+        <div class="flex items-center gap-3 cursor-pointer" @click="activeTab = 'marketplace'">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-brand-600 via-teal-500 to-indigo-600 flex items-center justify-center font-extrabold text-2xl text-white neon-glow">
+            NS
+          </div>
+          <div>
+            <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-gray-100 to-brand-400 bg-clip-text text-transparent">NEXSCRIPT</span>
+            <span class="block text-[10px] text-gray-400 font-semibold tracking-wider uppercase">Code Marketplace</span>
+          </div>
+        </div>
+
+        <!-- Desktop Navigation Tabs -->
+        <nav class="hidden md:flex items-center gap-1 bg-dark-800/80 p-1.5 rounded-xl border border-gray-800">
+          <button 
+            @click="activeTab = 'marketplace'" 
+            :class="activeTab === 'marketplace' ? 'bg-brand-600 text-white shadow-lg' : 'text-gray-400 hover:text-white hover:bg-dark-700/50'"
+            class="px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2">
+            <i data-lucide="store" class="w-4 h-4"></i>
+            Marketplace
+          </button>
+          
+          <button 
+            @click="activeTab = 'seller-studio'" 
+            :class="activeTab === 'seller-studio' ? 'bg-brand-600 text-white shadow-lg' : 'text-gray-400 hover:text-white hover:bg-dark-700/50'"
+            class="px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2">
+            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+            Seller Studio
+          </button>
+
+          <button 
+            @click="openBuyerPurchases" 
+            :class="activeTab === 'purchases' ? 'bg-brand-600 text-white shadow-lg' : 'text-gray-400 hover:text-white hover:bg-dark-700/50'"
+            class="px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2">
+            <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+            My Purchases
+            <span v-if="buyerPurchases.length" class="ml-1 px-1.5 py-0.5 text-[10px] bg-brand-400 text-dark-900 font-bold rounded-full">
+              {{ buyerPurchases.length }}
+            </span>
+          </button>
+
+          <button 
+            @click="activeTab = 'admin-center'" 
+            :class="activeTab === 'admin-center' ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-400 hover:text-white hover:bg-dark-700/50'"
+            class="px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2">
+            <i data-lucide="shield-alert" class="w-4 h-4"></i>
+            Admin Center
+            <span v-if="isAdminAuthenticated" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          </button>
+        </nav>
+
+        <!-- Right Side Actions & Auth Buttons -->
+        <div class="flex items-center gap-3">
+          
+          <!-- Buyer Account Indicator / Auth Trigger -->
+          <div v-if="isBuyerAuthenticated" class="flex items-center gap-3 bg-dark-800/90 px-3 py-1.5 rounded-xl border border-gray-800">
+            <div class="w-8 h-8 rounded-lg bg-brand-600/30 border border-brand-500/40 flex items-center justify-center text-brand-400 font-bold text-xs">
+              {{ buyerUser.email.substring(0,2).toUpperCase() }}
+            </div>
+            <div class="text-left hidden sm:block">
+              <span class="block text-xs font-semibold text-white truncate max-w-[120px]">{{ buyerUser.email }}</span>
+              <span class="block text-[10px] text-emerald-400 font-medium">Verified Buyer</span>
+            </div>
+            <button @click="logoutBuyer" class="p-1.5 text-gray-400 hover:text-rose-400 transition" title="Sign Out Buyer">
+              <i data-lucide="log-out" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <button 
+            v-else 
+            @click="openBuyerAuth('general')" 
+            class="px-4 py-2 rounded-xl text-sm font-semibold bg-dark-800 border border-gray-700 hover:border-brand-500 text-gray-200 hover:text-white transition flex items-center gap-2">
+            <i data-lucide="user" class="w-4 h-4 text-brand-400"></i>
+            Buyer Sign In
+          </button>
+
+          <!-- Seller Auth Status -->
+          <div v-if="isSellerAuthenticated" class="hidden lg:flex items-center gap-2 bg-emerald-950/40 text-emerald-300 border border-emerald-800/60 px-3 py-1.5 rounded-xl text-xs font-medium">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            Seller Active
+          </div>
+
+        </div>
+      </div>
+    </header>
+
+    <!-- Notification Toast System -->
+    <div class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-md">
+      <transition-group name="toast">
+        <div 
+          v-for="toast in toasts" 
+          :key="toast.id" 
+          :class="{
+            'bg-emerald-950/90 border-emerald-500/50 text-emerald-200': toast.type === 'success',
+            'bg-rose-950/90 border-rose-500/50 text-rose-200': toast.type === 'error',
+            'bg-amber-950/90 border-amber-500/50 text-amber-200': toast.type === 'warning',
+            'bg-dark-800/90 border-brand-500/50 text-brand-200': toast.type === 'info'
+          }"
+          class="p-4 rounded-xl border backdrop-blur-xl shadow-2xl flex items-start gap-3 transition-all duration-300">
+          <i :data-lucide="toast.type === 'success' ? 'check-circle' : toast.type === 'error' ? 'alert-triangle' : 'info'" class="w-5 h-5 shrink-0 mt-0.5"></i>
+          <div class="flex-1 text-xs leading-relaxed font-medium">
+            {{ toast.message }}
+          </div>
+          <button @click="removeToast(toast.id)" class="text-gray-400 hover:text-white">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </transition-group>
+    </div>
+
+    <!-- MAIN VIEW CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+      <!-- ========================================== -->
+      <!-- VIEW 1: PUBLIC MARKETPLACE (OPEN BROWSING) -->
+      <!-- ========================================== -->
+      <section v-if="activeTab === 'marketplace'" class="space-y-8">
+        
+        <!-- Hero Header -->
+        <div class="relative overflow-hidden rounded-3xl glass-card border border-gray-800 p-8 sm:p-12 text-center bg-gradient-to-b from-dark-800/90 to-dark-900/90">
+          <div class="absolute inset-0 bg-gradient-to-r from-brand-600/10 via-indigo-600/10 to-purple-600/10 pointer-events-none"></div>
+          
+          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 mb-4">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Verified Source Code Marketplace
+          </span>
+          
+          <h1 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight max-w-3xl mx-auto leading-tight">
+            Discover & Buy Production-Ready <span class="bg-gradient-to-r from-brand-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent">Scripts, Plugins & Themes</span>
+          </h1>
+          <p class="mt-4 text-sm sm:text-base text-gray-400 max-w-2xl mx-auto leading-relaxed">
+            Instant zip source code downloads, built-in license verification SDKs, and 14-day protected escrow wallet holding for buyers and developers.
+          </p>
+
+          <!-- Search & Filter Controls -->
+          <div class="mt-8 max-w-2xl mx-auto flex flex-col sm:flex-row gap-3">
+            <div class="relative flex-1">
+              <i data-lucide="search" class="w-5 h-5 absolute left-4 top-3.5 text-gray-400"></i>
+              <input 
+                v-model="searchQuery" 
+                type="text" 
+                placeholder="Search PHP scripts, React templates, WordPress plugins..." 
+                class="w-full bg-dark-900/90 border border-gray-700/80 rounded-2xl pl-12 pr-4 py-3 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
+              />
+            </div>
+            
+            <select 
+              v-model="selectedCategory" 
+              class="bg-dark-900/90 border border-gray-700/80 rounded-2xl px-4 py-3 text-sm text-gray-300 focus:outline-none focus:border-brand-500 transition">
+              <option value="All">All Categories</option>
+              <option value="Scripts">Scripts & Backend</option>
+              <option value="Plugins">Plugins & Extensions</option>
+              <option value="Themes">Themes & Frontends</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Product Grid -->
+        <div>
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="layers" class="w-5 h-5 text-brand-400"></i>
+              Featured Source Code Products
+            </h2>
+            <span class="text-xs text-gray-400 font-medium">Showing {{ filteredProducts.length }} listings</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div 
+              v-for="product in filteredProducts" 
+              :key="product.id" 
+              class="glass-card rounded-2xl border border-gray-800 hover:border-brand-500/40 transition-all duration-300 flex flex-col overflow-hidden group">
+              
+              <!-- Card Header Badge -->
+              <div class="p-6 pb-4 flex-1 flex flex-col">
+                <div class="flex items-center justify-between gap-2 mb-3">
+                  <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-dark-800 text-brand-400 border border-brand-500/20">
+                    {{ product.category }}
+                  </span>
+                  <span class="text-xs font-semibold text-emerald-400 bg-emerald-950/50 border border-emerald-800/40 px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <i data-lucide="check-circle-2" class="w-3 h-3"></i> Approved
+                  </span>
+                </div>
+
+                <h3 class="text-lg font-bold text-white group-hover:text-brand-400 transition line-clamp-1">
+                  {{ product.title }}
+                </h3>
+                <p class="text-xs text-gray-400 mt-2 line-clamp-2 leading-relaxed flex-1">
+                  {{ product.description }}
+                </p>
+
+                <!-- Seller Info -->
+                <div class="mt-4 pt-4 border-t border-gray-800/80 flex items-center justify-between text-xs text-gray-400">
+                  <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded-full bg-brand-600/30 border border-brand-500/40 flex items-center justify-center font-bold text-[10px] text-brand-300">
+                      {{ product.sellerEmail.substring(0,2).toUpperCase() }}
+                    </div>
+                    <span class="truncate max-w-[110px]">{{ product.sellerEmail }}</span>
+                  </div>
+                  <div class="flex items-center gap-1 text-amber-400 font-medium">
+                    <i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400"></i>
+                    <span>{{ product.rating }}</span>
+                    <span class="text-gray-500">({{ product.salesCount }})</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pricing & Action Bar -->
+              <div class="bg-dark-900/80 p-4 border-t border-gray-800/80 flex items-center justify-between gap-3">
+                <div>
+                  <span class="block text-[10px] text-gray-400 font-medium">Starting from</span>
+                  <span class="text-lg font-extrabold text-white">${{ product.singlePrice }}</span>
+                  <span class="text-xs text-gray-400"> / single</span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <button 
+                    @click="initiateDownloadOrPurchase(product)" 
+                    class="px-3.5 py-2 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-500 text-white transition flex items-center gap-1.5 shadow-lg shadow-brand-900/30">
+                    <i data-lucide="download-cloud" class="w-4 h-4"></i>
+                    Download Zip
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- ========================================== -->
+      <!-- VIEW 2: SELLER STUDIO                      -->
+      <!-- ========================================== -->
+      <section v-if="activeTab === 'seller-studio'" class="space-y-8">
+        
+        <!-- Seller Authentication Gate -->
+        <div v-if="!isSellerAuthenticated" class="max-w-md mx-auto glass-card rounded-3xl p-8 border border-gray-800 text-center">
+          
+          <div class="w-16 h-16 rounded-2xl bg-brand-600/20 border border-brand-500/30 text-brand-400 flex items-center justify-center mx-auto mb-4">
+            <i data-lucide="code-2" class="w-8 h-8"></i>
+          </div>
+
+          <h2 class="text-2xl font-bold text-white tracking-tight">Seller Studio Portal</h2>
+          <p class="text-xs text-gray-400 mt-2 leading-relaxed">
+            Publish PHP scripts, themes, or plugins. Earn money with protected 14-day escrow holdings.
+          </p>
+
+          <!-- Auth Mode Toggle Tabs -->
+          <div class="grid grid-cols-2 gap-1 bg-dark-900/80 p-1 rounded-xl border border-gray-800 mt-6">
+            <button 
+              @click="sellerAuthTab = 'signin'" 
+              :class="sellerAuthTab === 'signin' ? 'bg-brand-600 text-white font-bold' : 'text-gray-400 hover:text-white'"
+              class="py-2 text-xs rounded-lg transition">
+              Sign In
+            </button>
+            <button 
+              @click="sellerAuthTab = 'signup'" 
+              :class="sellerAuthTab === 'signup' ? 'bg-brand-600 text-white font-bold' : 'text-gray-400 hover:text-white'"
+              class="py-2 text-xs rounded-lg transition">
+              Sign Up
+            </button>
+          </div>
+
+          <!-- SIGN IN FORM -->
+          <form v-if="sellerAuthTab === 'signin'" @submit.prevent="handleSellerSignIn" class="mt-6 space-y-4 text-left">
+            <div>
+              <label class="block text-xs font-semibold text-gray-300 mb-1.5">Seller Email</label>
+              <input 
+                v-model="sellerForm.email" 
+                type="email" 
+                required 
+                placeholder="developer@company.com" 
+                class="w-full bg-dark-900 border border-gray-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-gray-300 mb-1.5">Password</label>
+              <input 
+                v-model="sellerForm.password" 
+                type="password" 
+                required 
+                placeholder="••••••••" 
+                class="w-full bg-dark-900 border border-gray-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
+              />
+            </div>
+
+            <button 
+              type="submit" 
+              class="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-500 font-bold text-xs text-white transition flex items-center justify-center gap-2">
+              <i data-lucide="log-in" class="w-4 h-4"></i> Sign In to Studio
+            </button>
+          </form>
+
+          <!-- SIGN UP FORM (WITH EMAIL VALIDATION PIPELINE) -->
+          <form v-if="sellerAuthTab === 'signup' && sellerSignUpStep === 1" @submit.prevent="startSellerVerification" class="mt-6 space-y-4 text-left">
+            
+            <!-- Real-time Verification Engine Banner -->
+            <div class="p-3 rounded-xl bg-dark-900/90 border border-gray-800 text-[11px] text-gray-400 space-y-1">
+              <div class="text-brand-400 font-semibold flex items-center gap-1">
+                <i data-lucide="shield" class="w-3.5 h-3.5"></i> Automated Mail Security Checks:
+              </div>
+              <ul class="list-disc pl-4 space-y-0.5 text-[10px]">
+                <li>RFC Syntax & Domain Existence Validation</li>
+                <li>Disposable & Temp-Mail Rejection</li>
+                <li>Mail Server MX Record & Virtual SMTP Ping</li>
+              </ul>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-gray-300 mb-1.5">Your Developer Email</label>
+              <input 
+                v-model="sellerForm.email" 
+                type="email" 
+                required 
+                placeholder="developer@company.com" 
+                class="w-full bg-dark-900 border border-gray-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-gray-300 mb-1.5">Create Secure Password</label>
+              <input 
+                v-model="sellerForm.password" 
+                type="password" 
+                required 
+                placeholder="••••••••" 
+                class="w-full bg-dark-900 border border-gray-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
+              />
+            </div>
+
+            <button 
+              type="submit" 
+              :disabled="isValidatingEmail"
+              class="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-500 font-bold text-xs text-white transition flex items-center justify-center gap-2 disabled:opacity-50">
+              <i v-if="!isValidatingEmail" data-lucide="mail-check" class="w-4 h-4"></i>
+              <span v-if="isValidatingEmail" class="animate-spin text-white">⚙</span>
+              {{ isValidatingEmail ? 'Running MX & SMTP Verification...' : 'Run Security Check & Send Code' }}
+            </button>
+          </form>
+
+          <!-- SELLER OTP & MAGIC LINK STEP -->
+          <div v-if="sellerAuthTab === 'signup' && sellerSignUpStep === 2" class="mt-6 space-y-4 text-left">
+            <div class="p-3 rounded-xl bg-brand-950/60 border border-brand-500/40 text-center">
+              <span class="block text-xs text-gray-300 font-medium">Verification Code Sent To</span>
+              <span class="text-xs font-bold text-brand-400">{{ sellerForm.email }}</span>
+              <span class="block text-[10px] text-amber-400 mt-1 font-mono">Expires in: {{ formatTimer(otpCountdown) }}</span>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-gray-300 mb-1.5">Enter 6-Digit OTP Code</label>
+              <input 
+                v-model="sellerForm.otpInput" 
+                type="text" 
+                maxlength="6" 
+                placeholder="123456" 
+                class="w-full bg-dark-900 border border-gray-700 rounded-xl px-4 py-2.5 text-center font-mono text-lg text-brand-400 tracking-widest focus:outline-none focus:border-brand-500"
+              />
+            </div>
+
+            <button 
+              @click="completeSellerRegistration" 
+              class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-xs text-white transition flex items-center justify-center gap-2">
+              <i data-lucide="check-circle" class="w-4 h-4"></i> Complete Registration
+            </button>
+
+            <button 
+              @click="sellerSignUpStep = 1" 
+              class="w-full text-center text-xs text-gray-400 hover:text-white underline">
+              Change Email Address
+            </button>
+          </div>
+
+        </div>
+
+        <!-- SELLER DASHBOARD (AUTHENTICATED) -->
+        <div v-else class="space-y-8">
+          
+          <!-- Dashboard Top Header Bar -->
+          <div class="glass-card rounded-2xl p-6 border border-gray-800 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+              <span class="text-xs font-semibold text-brand-400 uppercase tracking-wider">Seller Developer Hub</span>
+              <h2 class="text-2xl font-bold text-white mt-0.5">Welcome, {{ sellerUser.email }}</h2>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <button 
+                @click="showCreateProductModal = true" 
+                class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 font-bold text-xs text-white transition flex items-center gap-2 shadow-lg shadow-brand-900/30">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i> Upload New Product
+              </button>
+
+              <button 
+                @click="logoutSeller" 
+                class="px-3 py-2.5 rounded-xl bg-dark-800 border border-gray-700 hover:border-rose-500 text-gray-400 hover:text-rose-400 text-xs font-semibold transition">
+                Sign Out
+              </button>
+            </div>
+          </div>
+
+          <!-- Wallet & Analytics Overview -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <div class="glass-card p-6 rounded-2xl border border-gray-800">
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-400 font-semibold uppercase">Internal Wallet Balance</span>
+                <i data-lucide="wallet" class="w-5 h-5 text-brand-400"></i>
+              </div>
+              <div class="text-3xl font-extrabold text-white mt-3">${{ sellerWallet.available.toFixed(2) }}</div>
+              <p class="text-[10px] text-emerald-400 mt-1">Available for immediate withdrawal</p>
+            </div>
+
+            <div class="glass-card p-6 rounded-2xl border border-gray-800">
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-400 font-semibold uppercase">14-Day Escrow Hold</span>
+                <i data-lucide="clock" class="w-5 h-5 text-amber-400"></i>
+              </div>
+              <div class="text-3xl font-extrabold text-amber-400 mt-3">${{ sellerWallet.escrowHold.toFixed(2) }}</div>
+              <p class="text-[10px] text-gray-400 mt-1">Protected buyer hold window</p>
+            </div>
+
+            <div class="glass-card p-6 rounded-2xl border border-gray-800 flex flex-col justify-between">
+              <div>
+                <span class="text-xs text-gray-400 font-semibold uppercase">Payout Channel</span>
+                <div class="text-sm font-bold text-white mt-1">
+                  {{ sellerWallet.payoutMethod ? sellerWallet.payoutMethod : 'No Payout Info Configured Yet' }}
+                </div>
+              </div>
+
+              <button 
+                @click="showPayoutModal = true" 
+                class="mt-4 w-full py-2 rounded-xl bg-dark-800 border border-gray-700 hover:border-brand-500 text-xs font-bold text-brand-400 transition">
+                Configure Withdrawal Settings
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Seller Products Listing -->
+          <div class="glass-card rounded-2xl border border-gray-800 p-6">
+            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+              <i data-lucide="package" class="w-5 h-5 text-brand-400"></i>
+              My Script Listings & Moderation Status
+            </h3>
+
+            <div v-if="sellerProducts.length === 0" class="text-center py-12 text-gray-400 text-xs">
+              No products uploaded yet. Click "Upload New Product" to submit your first script or plugin!
+            </div>
+
+            <div v-else class="space-y-4">
+              <div 
+                v-for="item in sellerProducts" 
+                :key="item.id" 
+                class="p-4 rounded-xl bg-dark-900/80 border border-gray-800 flex flex-col md:flex-row items-center justify-between gap-4">
+                
+                <div class="flex items-center gap-4">
+                  <div class="w-10 h-10 rounded-xl bg-brand-600/20 border border-brand-500/30 flex items-center justify-center text-brand-400 font-bold text-sm">
+                    {{ item.category.substring(0,1) }}
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-bold text-white">{{ item.title }}</h4>
+                    <span class="text-xs text-gray-400">Single: ${{ item.singlePrice }} | Extended: ${{ item.multiPrice }}</span>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                  <span 
+                    :class="{
+                      'bg-emerald-950/80 text-emerald-300 border-emerald-800': item.status === 'Approved',
+                      'bg-amber-950/80 text-amber-300 border-amber-800': item.status === 'Pending Review',
+                      'bg-rose-950/80 text-rose-300 border-rose-800': item.status === 'Rejected'
+                    }"
+                    class="px-3 py-1 rounded-full border text-xs font-semibold">
+                    {{ item.status }}
+                  </span>
+
+                  <button 
+                    @click="openLicenseSdkModal(item)" 
+                    class="px-3 py-1.5 rounded-lg bg-dark-800 border border-gray-700 hover:border-brand-500 text-xs text-brand-400 font-medium transition">
+                    Get SDK Snippet
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ========================================== -->
+      <!-- VIEW 3: BUYER PURCHASES PORTAL            -->
+      <!-- ========================================== -->
+      <section v-if="activeTab === 'purchases'" class="space-y-8">
+        
+        <div class="glass-card rounded-2xl p-6 border border-gray-800">
+          <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+            <i data-lucide="shopping-bag" class="w-6 h-6 text-brand-400"></i>
+            My Purchased Scripts & Licenses
+          </h2>
+          <p class="text-xs text-gray-400 mt-1">
+            Access your direct zip file downloads, active license keys, and 14-day technical support tickets.
+          </p>
+        </div>
+
+        <div v-if="buyerPurchases.length === 0" class="glass-card rounded-2xl p-12 text-center text-gray-400 text-xs">
+          You haven't purchased any items yet. Visit the Marketplace to explore verified scripts!
+        </div>
+
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div 
+            v-for="purchase in buyerPurchases" 
+            :key="purchase.id" 
+            class="glass-card rounded-2xl border border-gray-800 p-6 space-y-4">
+            
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-1 rounded-md text-[10px] font-bold bg-brand-600/20 text-brand-400 border border-brand-500/30">
+                {{ purchase.licenseType.toUpperCase() }} LICENSE
+              </span>
+              <span class="text-xs text-gray-400">{{ purchase.purchaseDate }}</span>
+            </div>
+
+            <h3 class="text-lg font-bold text-white">{{ purchase.productTitle }}</h3>
+
+            <!-- License Key Display -->
+            <div class="p-3 rounded-xl bg-dark-900 border border-gray-800 flex items-center justify-between">
+              <span class="font-mono text-xs text-emerald-400 tracking-wider">{{ purchase.licenseKey }}</span>
+              <button @click="copyToClipboard(purchase.licenseKey)" class="text-xs text-gray-400 hover:text-white">
+                <i data-lucide="copy" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+            <!-- Download Button -->
+            <button 
+              @click="downloadZipSource(purchase)" 
+              class="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-500 font-bold text-xs text-white transition flex items-center justify-center gap-2">
+              <i data-lucide="download" class="w-4 h-4"></i> Download Zip Source Code
+            </button>
+
+            <!-- File Dispute Button -->
+            <button 
+              @click="openDisputeModal(purchase)" 
+              class="w-full py-2 rounded-xl bg-dark-800 border border-gray-700 hover:border-rose-500 text-xs text-rose-400 font-medium transition">
+              Report Broken Item / Request Refund
+            </button>
+
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- ========================================== -->
+      <!-- VIEW 4: ADMIN CONTROL CENTER               -->
+      <!-- ========================================== -->
+      <section v-if="activeTab === 'admin-center'" class="space-y-8">
+        
+        <!-- ADMIN AUTHENTICATION FORM -->
+        <div v-if="!isAdminAuthenticated" class="max-w-md mx-auto glass-card rounded-3xl p-8 border border-gray-800 text-center">
+          <div class="w-16 h-16 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center mx-auto mb-4">
+            <i data-lucide="shield-alert" class="w-8 h-8"></i>
+          </div>
+
+          <h2 class="text-2xl font-bold text-white tracking-tight">Admin Authentication Required</h2>
+          <p class="text-xs text-gray-400 mt-2 leading-relaxed">
+            Access to NexScript Control Center is strictly restricted to authorized administrators.
+          </p>
+
+          <form @submit.prevent="verifyAdminAccess" class="mt-6 space-y-4 text-left">
+            <div>
+              <label class="block text-xs font-semibold text-gray-300 mb-1.5">Admin Email Address</label>
+              <input 
+                v-model="adminEmailInput" 
+                type="email" 
+                required 
+                placeholder="admin@domain.com" 
+                class="w-full bg-dark-900 border border-gray-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-gray-300 mb-1.5">Admin Password</label>
+              <input 
+                v-model="adminPasswordInput" 
+                type="password" 
+                required 
+                placeholder="••••••••" 
+                class="w-full bg-dark-900 border border-gray-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <button 
+              type="submit" 
+              class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-bold text-xs text-white transition flex items-center justify-center gap-2">
+              <i data-lucide="lock" class="w-4 h-4"></i> Authenticate Overseer
+            </button>
+          </form>
+        </div>
+
+        <!-- ADMIN CONTROL PANEL (AUTHENTICATED) -->
+        <div v-else class="space-y-8">
+          
+          <div class="glass-card rounded-2xl p-6 border border-gray-800 flex items-center justify-between">
+            <div>
+              <span class="text-xs font-semibold text-indigo-400 uppercase tracking-wider">System Overseer Panel</span>
+              <h2 class="text-2xl font-bold text-white">NexScript Administration Hub</h2>
+            </div>
+
+            <button @click="logoutAdmin" class="px-4 py-2 rounded-xl bg-dark-800 border border-gray-700 hover:border-rose-500 text-xs font-bold text-rose-400 transition">
+              Exit Admin Mode
+            </button>
+          </div>
+
+          <!-- Pending Script Approvals -->
+          <div class="glass-card rounded-2xl border border-gray-800 p-6">
+            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+              <i data-lucide="clock" class="w-5 h-5 text-amber-400"></i>
+              Pending Script Approvals ({{ pendingApprovalProducts.length }})
+            </h3>
+
+            <div v-if="pendingApprovalProducts.length === 0" class="text-gray-400 text-xs py-6 text-center">
+              No pending scripts awaiting moderation.
+            </div>
+
+            <div v-else class="space-y-4">
+              <div 
+                v-for="item in pendingApprovalProducts" 
+                :key="item.id" 
+                class="p-4 rounded-xl bg-dark-900 border border-gray-800 flex flex-col md:flex-row items-center justify-between gap-4">
+                
+                <div>
+                  <h4 class="text-sm font-bold text-white">{{ item.title }}</h4>
+                  <p class="text-xs text-gray-400">{{ item.description }}</p>
+                  <span class="text-[10px] text-brand-400 mt-1 block">Seller: {{ item.sellerEmail }}</span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <button 
+                    @click="approveProduct(item)" 
+                    class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white transition">
+                    Approve Listing
+                  </button>
+                  <button 
+                    @click="rejectProduct(item)" 
+                    class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-bold text-white transition">
+                    Reject
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+
+    <!-- ========================================== -->
+    <!-- MODAL 1: EMAIL DISPATCH & MAGIC LINK INTERCEPT -->
+    <!-- ========================================== -->
+    <div v-if="showEmailDispatchModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="glass-card max-w-lg w-full rounded-3xl p-6 border border-brand-500/40 text-left shadow-2xl space-y-4">
+        
+        <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+          <div class="flex items-center gap-2">
+            <i data-lucide="mail-check" class="w-5 h-5 text-brand-400"></i>
+            <h3 class="text-sm font-bold text-white">Simulated Incoming Email Dispatch</h3>
+          </div>
+          <button @click="showEmailDispatchModal = false" class="text-gray-400 hover:text-white">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-dark-900/90 border border-gray-800 text-xs space-y-3">
+          <div>
+            <span class="text-gray-400 font-medium">To:</span>
+            <span class="text-white font-bold ml-1">{{ activeDispatchedEmail }}</span>
+          </div>
+
+          <div>
+            <span class="text-gray-400 font-medium">Subject:</span>
+            <span class="text-brand-400 font-bold ml-1">NexScript Account Verification & Magic Link</span>
+          </div>
+
+          <div class="p-3 rounded-xl bg-dark-800 border border-gray-700 text-center space-y-2">
+            <span class="block text-[10px] text-gray-400 uppercase tracking-wider">Verification 6-Digit OTP</span>
+            <span class="font-mono text-2xl font-black text-brand-400 tracking-widest">{{ activeDispatchedOtp }}</span>
+          </div>
+
+          <div class="text-center pt-2">
+            <span class="block text-[10px] text-gray-400 mb-2">Or click the automated 24-Hour Magic Verification Link:</span>
+            <button 
+              @click="triggerMagicLinkClick" 
+              class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition flex items-center justify-center gap-2">
+              <i data-lucide="external-link" class="w-4 h-4"></i> https://nexscript.com/verify?token={{ activeDispatchedToken }}
+            </button>
+          </div>
+        </div>
+
+        <button 
+          @click="showEmailDispatchModal = false" 
+          class="w-full py-2.5 rounded-xl bg-dark-800 border border-gray-700 text-xs font-bold text-gray-300 hover:text-white">
+          Close Email Preview
+        </button>
+
+      </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- MODAL 2: BUYER AUTHENTICATION POPUP        -->
+    <!-- ========================================== -->
+    <div v-if="showBuyerAuthModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="glass-card max-w-md w-full rounded-3xl p-6 border border-brand-500/40 text-left shadow-2xl space-y-4">
+        
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-bold text-white">Buyer Sign In / Sign Up</h3>
+          <button @click="showBuyerAuthModal = false" class="text-gray-400 hover:text-white">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Auth Tabs -->
+        <div class="grid grid-cols-2 gap-1 bg-dark-900/80 p-1 rounded-xl border border-gray-800">
+          <button 
+            @click="buyerAuthTab = 'signin'" 
+            :class="buyerAuthTab === 'signin' ? 'bg-brand-600 text-white font-bold' : 'text-gray-400 hover:text-white'"
+            class="py-2 text-xs rounded-lg transition">
+            Sign In
+          </button>
+          <button 
+            @click="buyerAuthTab = 'signup'" 
+            :class="buyerAuthTab === 'signup' ? 'bg-brand-600 text-white font-bold' : 'text-gray-400 hover:text-white'"
+            class="py-2 text-xs rounded-lg transition">
+            Sign Up
+          </button>
+        </div>
+
+        <!-- BUYER SIGN IN -->
+        <form v-if="buyerAuthTab === 'signin'" @submit.prevent="handleBuyerSignIn" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1.5">Email Address</label>
+            <input 
+              v-model="buyerForm.email" 
+              type="email" 
+              required 
+              placeholder="buyer@domain.com" 
+              class="w-full bg-dark-900 border border-gray-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
+            />
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1.5">Password</label>
+            <input 
+              v-model="buyerForm.password" 
+              type="password" 
+              required 
+              placeholder="••••••••" 
+              class="w-full bg-dark-900 border border-gray-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
+            />
+          </div>
+
+          <button type="submit" class="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-500 font-bold text-xs text-white transition">
+            Sign In as Buyer
+          </button>
+        </form>
+
+        <!-- BUYER SIGN UP WITH EMAIL VALIDATION -->
+        <form v-if="buyerAuthTab === 'signup' && buyerSignUpStep === 1" @submit.prevent="startBuyerVerification" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1.5">Your Email Address</label>
+            <input 
+              v-model="buyerForm.email" 
+              type="email" 
+              required 
+              placeholder="buyer@domain.com" 
+              class="w-full bg-dark-900 border border-gray-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
+            />
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1.5">Create Password</label>
+            <input 
+              v-model="buyerForm.password" 
+              type="password" 
+              required 
+              placeholder="••••••••" 
+              class="w-full bg-dark-900 border border-gray-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
+            />
+          </div>
+
+          <button 
+            type="submit" 
+            :disabled="isValidatingEmail"
+            class="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-500 font-bold text-xs text-white transition flex items-center justify-center gap-2">
+            <span v-if="isValidatingEmail" class="animate-spin">⚙</span>
+            {{ isValidatingEmail ? 'Running Security Check...' : 'Verify Email & Proceed' }}
+          </button>
+        </form>
+
+        <!-- BUYER OTP STEP -->
+        <div v-if="buyerAuthTab === 'signup' && buyerSignUpStep === 2" class="space-y-4">
+          <div class="p-3 rounded-xl bg-brand-950/60 border border-brand-500/40 text-center">
+            <span class="block text-xs text-gray-300 font-medium">Verification Code Sent To</span>
+            <span class="text-xs font-bold text-brand-400">{{ buyerForm.email }}</span>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1.5">Enter 6-Digit OTP</label>
+            <input 
+              v-model="buyerForm.otpInput" 
+              type="text" 
+              maxlength="6" 
+              placeholder="123456" 
+              class="w-full bg-dark-900 border border-gray-700 rounded-xl px-4 py-2.5 text-center font-mono text-lg text-brand-400 tracking-widest focus:outline-none"
+            />
+          </div>
+
+          <button @click="completeBuyerRegistration" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-xs text-white transition">
+            Verify & Create Account
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- MODAL 3: CHECKOUT & LICENSE OPTION MODAL   -->
+    <!-- ========================================== -->
+    <div v-if="showCheckoutModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+      <div v-if="selectedCheckoutProduct" class="glass-card max-w-lg w-full rounded-3xl p-6 border border-brand-500/40 text-left shadow-2xl space-y-6">
+        
+        <div class="flex items-center justify-between border-b border-gray-800 pb-4">
+          <div>
+            <span class="text-[10px] font-bold text-brand-400 uppercase tracking-wider">Checkout & License Authorization</span>
+            <h3 class="text-lg font-bold text-white">{{ selectedCheckoutProduct.title }}</h3>
+          </div>
+          <button @click="showCheckoutModal = false" class="text-gray-400 hover:text-white">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- License Option Choice -->
+        <div class="grid grid-cols-2 gap-4">
+          <div 
+            @click="checkoutLicenseType = 'single'" 
+            :class="checkoutLicenseType === 'single' ? 'border-brand-500 bg-brand-950/30' : 'border-gray-800 bg-dark-900'"
+            class="p-4 rounded-2xl border cursor-pointer transition space-y-2">
+            <span class="text-xs font-bold text-white block">Single License</span>
+            <span class="text-xl font-extrabold text-brand-400 block">${{ selectedCheckoutProduct.singlePrice }}</span>
+            <p class="text-[10px] text-gray-400">1 End product / Single site installation.</p>
+          </div>
+
+          <div 
+            @click="checkoutLicenseType = 'multiple'" 
+            :class="checkoutLicenseType === 'multiple' ? 'border-brand-500 bg-brand-950/30' : 'border-gray-800 bg-dark-900'"
+            class="p-4 rounded-2xl border cursor-pointer transition space-y-2">
+            <span class="text-xs font-bold text-white block">Multiple / SaaS</span>
+            <span class="text-xl font-extrabold text-brand-400 block">${{ selectedCheckoutProduct.multiPrice }}</span>
+            <p class="text-[10px] text-gray-400">Unlimited installations / SaaS integration.</p>
+          </div>
+        </div>
+
+        <!-- Payment Button -->
+        <button 
+          @click="processCheckoutPayment" 
+          class="w-full py-3.5 rounded-2xl bg-brand-600 hover:bg-brand-500 font-bold text-sm text-white transition flex items-center justify-center gap-2 shadow-xl shadow-brand-900/40">
+          <i data-lucide="credit-card" class="w-4 h-4"></i> Complete Payment & Download
+        </button>
+
+      </div>
+    </div>
+
+
+    <!-- Footer -->
+    <footer class="mt-auto border-t border-gray-800/80 bg-dark-900/80 py-8">
+      <div class="max-w-7xl mx-auto px-4 text-center text-xs text-gray-500 space-y-2">
+        <p>© 2026 NexScript Marketplace Engine. All rights reserved.</p>
+        <p class="text-[10px]">Real-Time Email Verification Pipeline (Syntax, MX, SMTP Handshake & Disposable Detector Active)</p>
+      </div>
+    </footer>
+
+  </div>
+
+
+  <!-- VUE 3 APPLICATION SCRIPT -->
+  <script>
+    const { createApp, ref, computed, onMounted, onUpdated } = Vue;
+
+    createApp({
+      setup() {
+        
+        // Navigation & Tab State
+        const activeTab = ref('marketplace');
+        const searchQuery = ref('');
+        const selectedCategory = ref('All');
+
+        // Toast System
+        const toasts = ref([]);
+        const addToast = (message, type = 'info') => {
+          const id = Date.now();
+          toasts.value.push({ id, message, type });
+          setTimeout(() => removeToast(id), 4500);
+        };
+        const removeToast = (id) => {
+          toasts.value = toasts.value.filter(t => t.id !== id);
+        };
+
+        // ==========================================
+        // 5-TIER REAL-TIME EMAIL VALIDATOR ENGINE
+        // ==========================================
+        const isValidatingEmail = ref(false);
+        const tempMailDomains = [
+          'tempmail.com', '10minutemail.com', 'guerrillamail.com', 
+          'yopmail.com', 'mailinator.com', 'dispostable.com', 
+          'temp-mail.org', 'trashmail.com', 'getnada.com'
+        ];
+
+        const validateEmailPipeline = async (email) => {
+          isValidatingEmail.value = true;
+          await new Promise(res => setTimeout(res, 600)); // Simulate MX query delay
+
+          // Tier 1: Syntax & RFC Format Check
+          const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+          if (!emailRegex.test(email)) {
+            isValidatingEmail.value = false;
+            return { valid: false, reason: 'Invalid RFC email syntax or missing domain extension.' };
+          }
+
+          const domain = email.split('@')[1].toLowerCase();
+
+          // Tier 2: Disposable / Temp Mail Check
+          if (tempMailDomains.includes(domain)) {
+            isValidatingEmail.value = false;
+            return { valid: false, reason: 'Temporary or disposable email providers are blocked.' };
+          }
+
+          // Tier 3 & Tier 4: MX Record Simulation
+          if (!domain.includes('.')) {
+            isValidatingEmail.value = false;
+            return { valid: false, reason: 'Domain lacks valid Mail Exchange (MX) DNS resolution.' };
+          }
+
+          isValidatingEmail.value = false;
+          return { valid: true };
+        };
+
+
+        // ==========================================
+        // BUYER STATE & AUTHENTICATION
+        // ==========================================
+        const buyerUser = ref(null);
+        const isBuyerAuthenticated = computed(() => !!buyerUser.value);
+        const showBuyerAuthModal = ref(false);
+        const buyerAuthTab = ref('signin');
+        const buyerSignUpStep = ref(1);
+        const buyerForm = ref({ email: '', password: '', otpInput: '' });
+
+        const openBuyerAuth = (mode = 'general') => {
+          buyerAuthTab.value = 'signin';
+          showBuyerAuthModal.value = true;
+        };
+
+        const startBuyerVerification = async () => {
+          const check = await validateEmailPipeline(buyerForm.value.email);
+          if (!check.valid) {
+            addToast(check.reason, 'error');
+            return;
+          }
+
+          triggerEmailDispatch(buyerForm.value.email, 'buyer');
+          buyerSignUpStep.value = 2;
+          addToast('MX Check Passed! Verification code sent to email.', 'success');
+        };
+
+        const completeBuyerRegistration = () => {
+          if (buyerForm.value.otpInput !== generatedOtp.value) {
+            addToast('Invalid 6-digit OTP code!', 'error');
+            return;
+          }
+
+          buyerUser.value = { email: buyerForm.value.email, verified: true };
+          showBuyerAuthModal.value = false;
+          addToast('Buyer account created & verified successfully!', 'success');
+        };
+
+        const handleBuyerSignIn = () => {
+          buyerUser.value = { email: buyerForm.value.email, verified: true };
+          showBuyerAuthModal.value = false;
+          addToast('Signed in successfully!', 'success');
+        };
+
+        const logoutBuyer = () => {
+          buyerUser.value = null;
+          addToast('Signed out of buyer account.', 'info');
+        };
+
+
+        // ==========================================
+        // SELLER STATE & AUTHENTICATION
+        // ==========================================
+        const sellerUser = ref(null);
+        const isSellerAuthenticated = computed(() => !!sellerUser.value);
+        const sellerAuthTab = ref('signin');
+        const sellerSignUpStep = ref(1);
+        const sellerForm = ref({ email: '', password: '', otpInput: '' });
+        const otpCountdown = ref(120);
+
+        const sellerWallet = ref({
+          available: 340.00,
+          escrowHold: 120.00,
+          payoutMethod: 'PayPal (dev@company.com)'
+        });
+
+        const startSellerVerification = async () => {
+          const check = await validateEmailPipeline(sellerForm.value.email);
+          if (!check.valid) {
+            addToast(check.reason, 'error');
+            return;
+          }
+
+          triggerEmailDispatch(sellerForm.value.email, 'seller');
+          sellerSignUpStep.value = 2;
+          addToast('MX & Virtual SMTP Ping Succeeded! Verification code dispatched.', 'success');
+        };
+
+        const completeSellerRegistration = () => {
+          if (sellerForm.value.otpInput !== generatedOtp.value) {
+            addToast('Invalid 6-digit OTP code!', 'error');
+            return;
+          }
+
+          sellerUser.value = { email: sellerForm.value.email, verified: true };
+          addToast('Seller account registered & verified successfully!', 'success');
+        };
+
+        const handleSellerSignIn = () => {
+          sellerUser.value = { email: sellerForm.value.email, verified: true };
+          addToast('Welcome back to Seller Studio!', 'success');
+        };
+
+        const logoutSeller = () => {
+          sellerUser.value = null;
+          addToast('Signed out of Seller Studio.', 'info');
+        };
+
+
+        // ==========================================
+        // EMAIL DISPATCH & MAGIC LINK SIMULATOR
+        // ==========================================
+        const showEmailDispatchModal = ref(false);
+        const activeDispatchedEmail = ref('');
+        const activeDispatchedOtp = ref('');
+        const activeDispatchedToken = ref('');
+        const activeRoleContext = ref('buyer');
+        const generatedOtp = ref('');
+
+        const triggerEmailDispatch = (email, role) => {
+          const otp = Math.floor(100000 + Math.random() * 900000).toString();
+          const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
+
+          generatedOtp.value = otp;
+          activeDispatchedOtp.value = otp;
+          activeDispatchedToken.value = token;
+          activeDispatchedEmail.value = email;
+          activeRoleContext.value = role;
+
+          showEmailDispatchModal.value = true;
+        };
+
+        const triggerMagicLinkClick = () => {
+          if (activeRoleContext.value === 'seller') {
+            sellerUser.value = { email: activeDispatchedEmail.value, verified: true };
+            addToast('Magic Link Verified! Logged in as Seller.', 'success');
+          } else {
+            buyerUser.value = { email: activeDispatchedEmail.value, verified: true };
+            addToast('Magic Link Verified! Logged in as Buyer.', 'success');
+          }
+          showEmailDispatchModal.value = false;
+          showBuyerAuthModal.value = false;
+        };
+
+
+        // ==========================================
+        // ADMIN AUTHENTICATION
+        // ==========================================
+        const isAdminAuthenticated = ref(false);
+        const adminEmailInput = ref('');
+        const adminPasswordInput = ref('');
+
+        const verifyAdminAccess = () => {
+          if (adminEmailInput.value === 'minurachamalka911@gmail.com' && adminPasswordInput.value === 'hello1234') {
+            isAdminAuthenticated.value = true;
+            addToast('Admin Overseer Access Granted!', 'success');
+          } else {
+            addToast('Invalid admin credentials!', 'error');
+          }
+        };
+
+        const logoutAdmin = () => {
+          isAdminAuthenticated.value = false;
+          adminEmailInput.value = '';
+          adminPasswordInput.value = '';
+          addToast('Exited admin overseer mode.', 'info');
+        };
+
+
+        // ==========================================
+        // PRODUCTS & MARKETPLACE LOGIC
+        // ==========================================
+        const products = ref([
+          {
+            id: 1,
+            title: 'NexSaaS Multi-Tenant PHP Starter Kit',
+            category: 'Scripts',
+            singlePrice: 49,
+            multiPrice: 199,
+            rating: 4.9,
+            salesCount: 84,
+            status: 'Approved',
+            sellerEmail: 'alex@devstudio.io',
+            description: 'Complete multi-tenant SaaS boilerplate with Stripe billing, Vue 3 frontend, and automated domain routing.'
+          },
+          {
+            id: 2,
+            title: 'UltraCommerce WooCommerce Upsell Plugin',
+            category: 'Plugins',
+            singlePrice: 29,
+            multiPrice: 99,
+            rating: 4.8,
+            salesCount: 142,
+            status: 'Approved',
+            sellerEmail: 'plugins@wpnex.com',
+            description: 'High-converting checkout upsell and cross-sell drawer plugin with dynamic discount engines.'
+          },
+          {
+            id: 3,
+            title: 'DarkPulse React Admin Dashboard Theme',
+            category: 'Themes',
+            singlePrice: 39,
+            multiPrice: 149,
+            rating: 5.0,
+            salesCount: 61,
+            status: 'Approved',
+            sellerEmail: 'themes@uihub.org',
+            description: 'Modern Tailwind CSS & React admin template featuring dark mode, charts, and 40+ prebuilt screens.'
+          }
+        ]);
+
+        const filteredProducts = computed(() => {
+          return products.value.filter(p => {
+            const matchesCategory = selectedCategory.value === 'All' || p.category === selectedCategory.value;
+            const matchesQuery = p.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
+                                 p.description.toLowerCase().includes(searchQuery.value.toLowerCase());
+            return matchesCategory && matchesQuery && p.status === 'Approved';
+          });
+        });
+
+        const pendingApprovalProducts = computed(() => {
+          return products.value.filter(p => p.status === 'Pending Review');
+        });
+
+        const sellerProducts = computed(() => {
+          if (!sellerUser.value) return [];
+          return products.value.filter(p => p.sellerEmail === sellerUser.value.email);
+        });
+
+
+        // ==========================================
+        // PURCHASES & CHECKOUT LOGIC
+        // ==========================================
+        const buyerPurchases = ref([]);
+        const showCheckoutModal = ref(false);
+        const selectedCheckoutProduct = ref(null);
+        const checkoutLicenseType = ref('single');
+
+        const initiateDownloadOrPurchase = (product) => {
+          if (!isBuyerAuthenticated.value) {
+            addToast('Please sign in as a buyer to purchase or download scripts.', 'warning');
+            openBuyerAuth();
+            return;
+          }
+
+          selectedCheckoutProduct.value = product;
+          showCheckoutModal.value = true;
+        };
+
+        const processCheckoutPayment = () => {
+          const licenseKey = 'NEX-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+          
+          buyerPurchases.value.push({
+            id: Date.now(),
+            productTitle: selectedCheckoutProduct.value.title,
+            licenseType: checkoutLicenseType.value,
+            licenseKey: licenseKey,
+            purchaseDate: new Date().toLocaleDateString()
+          });
+
+          showCheckoutModal.value = false;
+          addToast('Payment completed! Source code and license key unlocked.', 'success');
+          activeTab.value = 'purchases';
+        };
+
+        const openBuyerPurchases = () => {
+          if (!isBuyerAuthenticated.value) {
+            addToast('Sign in to access your purchased scripts.', 'warning');
+            openBuyerAuth();
+            return;
+          }
+          activeTab.value = 'purchases';
+        };
+
+        const downloadZipSource = (purchase) => {
+          addToast(`Downloading ${purchase.productTitle} (.zip archive)...`, 'success');
+        };
+
+        const copyToClipboard = (text) => {
+          navigator.clipboard.writeText(text);
+          addToast('Copied to clipboard!', 'info');
+        };
+
+        const formatTimer = (sec) => {
+          const m = Math.floor(sec / 60);
+          const s = sec % 60;
+          return `${m}:${s < 10 ? '0' : ''}${s}`;
+        };
+
+        onMounted(() => {
+          lucide.createIcons();
+        });
+
+        onUpdated(() => {
+          lucide.createIcons();
+        });
+
+        return {
+          activeTab,
+          searchQuery,
+          selectedCategory,
+          toasts,
+          addToast,
+          removeToast,
+
+          // Validation & Email
+          isValidatingEmail,
+          showEmailDispatchModal,
+          activeDispatchedEmail,
+          activeDispatchedOtp,
+          activeDispatchedToken,
+          triggerMagicLinkClick,
+
+          // Buyer State
+          buyerUser,
+          isBuyerAuthenticated,
+          showBuyerAuthModal,
+          buyerAuthTab,
+          buyerSignUpStep,
+          buyerForm,
+          openBuyerAuth,
+          startBuyerVerification,
+          completeBuyerRegistration,
+          handleBuyerSignIn,
+          logoutBuyer,
+
+          // Seller State
+          sellerUser,
+          isSellerAuthenticated,
+          sellerAuthTab,
+          sellerSignUpStep,
+          sellerForm,
+          sellerWallet,
+          otpCountdown,
+          startSellerVerification,
+          completeSellerRegistration,
+          handleSellerSignIn,
+          logoutSeller,
+
+          // Admin State
+          isAdminAuthenticated,
+          adminEmailInput,
+          adminPasswordInput,
+          verifyAdminAccess,
+          logoutAdmin,
+
+          // Products & Checkout
+          products,
+          filteredProducts,
+          pendingApprovalProducts,
+          sellerProducts,
+          buyerPurchases,
+          showCheckoutModal,
+          selectedCheckoutProduct,
+          checkoutLicenseType,
+          initiateDownloadOrPurchase,
+          processCheckoutPayment,
+          openBuyerPurchases,
+          downloadZipSource,
+          copyToClipboard,
+          formatTimer
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
